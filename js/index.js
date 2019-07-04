@@ -1,0 +1,268 @@
+document.getElementById('mais-item').addEventListener('click', novoItem)
+document.getElementById('salvar-nota').addEventListener('click', cadastraItem)
+document.getElementById('frmPesquisa').addEventListener('submit', pesquisarNota)
+
+//variáveis globais
+let id = 0 // itens da nota - inputs dos forulários
+let notas = retornaStorage('notas') //array vazio ou array preenchido com as notas
+let mensagem = ''
+document.body.onload = geraTemplate(notas)
+
+/*<article class="nota">
+		<h4>Faça uma lista</h4>
+		<ul>
+			<li>Para reorganizar a lista, arraste e solte os itens</li>
+			<li>Assinale as tarefas concluídas</li>
+			<li>Os itens assinalados são movidos automaticamente para o fim da lista</li>
+		</ul>
+		<p class="acoes">
+			<a href="#"><i class="fa fa-apple fa-wf" aria-hidden="true"></i></a>
+			<a href="#"><i class="fa fa-android fa-wf" aria-hidden="true"></i></a>
+			<a href="#"><i class="fa fa-chrome fa-wf" aria-hidden="true"></i></a>
+			<a href="#">
+				<i class="fa fa-close fa-wf" aria-hidden="true"></i>
+			</a>
+		</p>
+	</article>*/
+
+function atualizaStorage(k, v) {
+    localStorage.setItem(k, JSON.stringify(v))
+}
+
+function retornaStorage(k) {
+    if (JSON.parse(localStorage.getItem(k)))
+        return JSON.parse(localStorage.getItem(k))
+    else
+        return []
+}
+/**
+ * let article = document.createElement('article')
+ * article.setAttribute("class", "nota")
+ * retornar o elemento
+ * 
+ */
+function criarElemento(nomeElemento, objProps, texto = null, elemPai = null) {
+    //criar elemento
+    let elemento = document.createElement(nomeElemento)
+
+    if (texto !== null)
+        elemento.appendChild(document.createTextNode(texto))
+
+    //setar atributos
+
+    for (const prop in objProps) {
+        //            propriedade , valor  
+        elemento.setAttribute(prop, objProps[prop])
+    }
+
+    if (elemPai !== null) {
+        elemPai.appendChild(elemento)
+    }
+    return elemento
+}
+
+function geraTemplate(notasLocal) {
+    //iterar o array de notas (nota a nota)
+    document.getElementById('section-notas').innerHTML = ''
+
+    for (let i = 0; i < notasLocal.length; i++) {
+        //criar os elementos
+        let article = document.createElement('article') // <article></article>
+        let h4 = criarElemento('h4', {}, notasLocal[i].titulo)
+        let ul = criarElemento('ul')
+        let p = criarElemento('p')
+
+        let aApple = criarElemento('a', { 'href': '#' })
+        let aAndroid = criarElemento('a', { 'href': '#' })
+        let aChrome = criarElemento('a', { 'href': '#' })
+        let aClose = criarElemento('a', { 'href': '#' })
+
+        let iApple = criarElemento('i', { 'class': 'fa fa-apple fa-wf', 'aria-hidden': 'true' })
+        let iAndroid = criarElemento('i', { 'class': 'fa fa-android fa-wf', 'aria-hidden': 'true' })
+        let iChrome = criarElemento('i', { 'class': 'fa fa-chrome fa-wf', 'aria-hidden': 'true' })
+        let iClose = criarElemento('i', { 'class': 'fa fa-close fa-wf', 'arial-hidden': 'true', 'onclick': 'excluirNota(this)', 'codigo': notas[i].codigo })
+
+        //iterando o array de itens da nota atual (item a item)
+        for (let x = 0; x < notasLocal[i].itens.length; x++) {
+            let li = document.createElement('li')
+            li.appendChild(document.createTextNode(notasLocal[i].itens[x]))
+            ul.appendChild(li)
+        }
+
+        p.setAttribute('class', 'acoes')
+        article.setAttribute("class", "nota") // <article class="nota"></article>
+
+        //gerar os append's necessários
+        aApple.appendChild(iApple)
+        aAndroid.appendChild(iAndroid)
+        aChrome.appendChild(iChrome)
+        aClose.appendChild(iClose)
+
+        p.appendChild(aApple)
+        p.appendChild(aAndroid)
+        p.appendChild(aChrome)
+        p.appendChild(aClose)
+
+        //h4.appendChild(document.createTextNode(notas[i].titulo))
+
+        article.appendChild(h4)
+        article.appendChild(ul)
+        article.appendChild(p)
+
+
+        //pra cada nota, você vai gerar um template
+        document.getElementById('section-notas').appendChild(article)
+    }
+
+    limpaCampo()
+
+}
+
+function limpaCampo() {
+    document.getElementById('limpar-nota').click()
+    document.getElementById('div-new').innerHTML = ''
+    id = 0
+}
+
+function cadastraItem() {
+    //recuperar o título
+    let titulo = document.getElementById('titulo').value
+
+    //recuperar os itens
+    let itens = document.getElementsByClassName('itens-lista'); //retorna um array com todos os inputs de itens
+
+    if (validaCadastro(titulo, itens)) {
+        let nota = {}
+        nota.codigo = Math.random()
+        nota.titulo = titulo.trim()
+        nota.itens = []
+        //cadastrar os itens
+        for (let i = 0; i < itens.length; i++) {
+            nota.itens.push(itens[i].value.trim())
+        }
+
+        notas.push(nota)
+        localStorage.setItem('notas', JSON.stringify(notas))
+        geraTemplate(notas)
+} else {    
+        alert(mensagem)
+        mensagem = ''
+    }
+}
+
+function validaCadastro(titulo, itens) {
+    if (titulo.trim() == '') {
+        mensagem = 'Preencha o título'
+        return false
+    }
+
+    if (itens.length == 0) {
+        mensagem = "Preencha pelo menos 1 item"
+        return false
+    }
+
+    for (i = 0; i < itens.length; i++) {
+        if (itens[i].value.trim() == '') {
+            mensagem = `Preencha o item ${i + 1}`
+            return false
+        }
+
+    }
+
+    return true;
+}
+
+function novoItem() {
+    //criar elementos
+    let div = document.createElement('div')
+    let label = document.createElement('label')
+    label.appendChild(document.createTextNode(`Item ${id + 1}`))
+    let input = document.createElement('input')
+    let icone = document.createElement('i')
+    let br = document.createElement('br')
+    br.setAttribute('class', 'clear')
+    // setar atributos
+    label.setAttribute('for', '')
+
+    input.setAttribute('type', 'text')
+    input.setAttribute('id', `item${id}`)
+    id++
+    input.setAttribute('class', 'itens-lista')
+
+    icone.setAttribute('class', 'fa fa-minus-square-o fa-lg')
+    icone.setAttribute('aria-hidden', 'true')
+    icone.setAttribute('style', 'margin-left: 1%;')
+
+    //motar lego(div)
+    div.appendChild(label)
+    div.appendChild(input)
+    div.appendChild(icone)
+    div.appendChild(br)
+
+    //inserir a div gerada em #div-new
+    document.getElementById('div-new').appendChild(div)
+    input.focus()
+}
+
+function excluirNota(icone) {
+    if (confirm("Você quer excluir a nota?")) {
+        let codigoNota = icone.getAttribute('codigo')
+        for (let i = 0; i < notas.length; i++) {
+            if (codigoNota == notas[i].codigo) {
+                notas.splice(i, 1)
+                localStorage.setItem('notas', JSON.stringify(notas))
+            }
+        }
+        // icone.parentNode.parentNode.parentNode.remove()// apava o article
+        //              i       a        p           article
+        let article = icone.parentNode.parentNode.parentNode
+        let section = document.getElementById('section-notas')
+        section.removeChild(article)
+    } //fim do confirm
+
+}
+
+function pesquisarNota() {
+    event.preventDefault()
+    let itemPesq = document.getElementById('pesquisar').value
+    arrPesquisa = []
+    
+    for (let i = 0; i < notas.length; i++) {
+        
+        if (notas[i].titulo.indexOf(itemPesq) >= 0) {
+            arrPesquisa.push(notas[i])   
+        }
+    }
+
+    if (arrPesquisa.length > 0) {
+        geraTemplate(arrPesquisa)
+    }
+    
+}
+
+
+/**
+ * Teste de consumo de API Ajax com Fetch
+//  */
+// function testarFetch() {
+//     const urlTodos = 'https://jsonplaceholder.typicode.com/todos'
+//     const urlUnico = 'https://jsonplaceholder.typicode.com/todos/1dfdfd'
+//     fetch(urlUnico).then(function(resultado) {
+//         if (resultado.status == 404)
+//             throw 'página não encontrada'
+
+//         return resultado.json()
+
+//     }).then(function(objetoDados) {
+
+//         console.log(
+//             `
+//                 código: ${objetoDados.id}
+//                 descrição : ${objetoDados.title}
+//             `
+//         );
+
+//     }).catch(function(e) {
+//         console.log(`Deu pau: ${e}`);
+//     })
+//}

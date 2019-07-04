@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste</title>
+    <link rel="stylesheet" href="css/estilos.css">
+</head>
+
+<body>
+
+
+    <p id="info"></p>
+    <button onclick="myFunction()">Exemplo</button>
+
+    <script>
+    
+            // let pessoa = {
+            //     nome: "Eduardo",
+            //     idade: 36, 
+            //     corOlhos: "castanhos"
+            // }
+            // console.log(pessoa);
+    
+            // for (const propriedade in pessoa) {
+            //     console.log('Dados do objeto');
+            //     //console.log(`${propriedade} : ${pessoa[propriedade]}`);
+            //     console.log('Propriedades');
+            //     console.log(`${propriedade}`);
+            //     console.log('Valor da Propriedade');
+            //     console.log(`${propriedade[propriedade]}`);
+                
+                
+            // }
+    
+            //<h4>teste</h4>
+            function criarElemento(nomeElemento, objProps, texto = null) {
+                //criar elemento
+                let elemento = document.createElement(nomeElemento)
+                if (texto !== null) {
+                    elemento.appendChild(document.createTextNode(texto))
+                }
+
+                //setar atributos
+                for (const prop in objProps) {
+                    elemento.setAttribute(prop, objProps[prop])
+                }
+                //retornar elemento
+                return elemento
+            }
+
+            function myFunction() {
+                let elemento = criarElemento("input",{ //propriedades
+                    type: "text",
+                    id: "nome", 
+                    placeholder: "Digite seu Nome",
+                    class: "input",
+                    name: "nome"
+                })
+                document.getElementById("info").appendChild(elemento)
+            }
+            
+    
+        </script>
+</body>
+
+</html>
